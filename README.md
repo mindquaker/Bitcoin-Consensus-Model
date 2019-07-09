@@ -24,5 +24,5 @@ Jaco van de Pol 2 <br/>
 Marielle Stoelinga 2 <br/>
 
 1 = University of the South Pacific, Fiji\
-2 = University of Twente, The Netherlands\
+2 = University of Twente, The Netherlands
 
