@@ -1,4 +1,6 @@
 const int mineMax = 5;
+const int nodeMax = 3;
+const int roundMax = 20;
 
 /*****************************
 
@@ -8,8 +10,8 @@ typedef struct
 	/***********************************************
 	Integer variables can be bounded to save memory. 
 	***********************************************/
-	int[1,3] id; // 3 nodes of the network
-	int[1,20] rd; // 20 rounds of mining?
+	int[1,nodeMax] id; // 3 nodes of the network
+	int[1,roundMax] rd; // 20 rounds of mining?
 	
 	int parent;    // "Pointer" to index of previous block in the blockchain array
 	int blocknum;  // Current number of block
