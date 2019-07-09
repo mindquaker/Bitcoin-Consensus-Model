@@ -1,0 +1,99 @@
+/****************************
+Chain growth determines the 
+rate at which an honest 
+party adds blocks to their
+chain
+
+Time Complexity: O()
+Space Complexity: O()
+****************************/
+bool ChainGrowth(int round)
+{
+	for(int id = 100; id < 103; id++)
+		{
+			// If the difference between the Global round and the
+			// round at the head of an honest chain is greater than
+			// some constant x, then the property fails
+			if( (GlobalRound - BestBlock[id].round) >= x )
+				return false;
+		}
+	
+	return true;
+}
+
+
+/****************************
+Chain quality determines
+the amount of malicious blocks
+in the chain of an hoenst
+party
+
+Time Complexity: O()
+Space Complexity: O()
+****************************/
+bool ChainQuality()
+{
+	for(int id = 100; id < 103; id++)
+	{
+		// Go from head of chain back to genesis block
+		while(BestBlock[id].parent != 0)
+		{
+			if(Block)
+		}
+	}
+}
+/*
+	1. Work backwards from the head of each honest chain until the genesis block is reached
+	2. Keep track of honest and genisis blocks
+	3. Terminate if the ratio of honest to malicious blocks exceeds some ratio lambda
+*/
+
+/****************************
+
+
+Time Complexity: O()
+Space Complexity: O()
+****************************/
+bool CommonPrefix()
+{
+	
+	for(int id = 100; id < 103; id++)
+	{
+		
+	}
+	
+	return true;
+}
+/*
+	1. Get length of each honest chain
+	2. Move backward from larger chains until each honest chain has the same length (and increase count)
+	3. Check if blocks are equal
+	4. If not, move backward and increase count (until a common prefix is found)
+	5. If the difference between the longest chain and the count is greater than some k, return false
+	6. Return true	
+	
+*/
+
+
+
+/****************************
+
+
+Time Complexity: O()
+Space Complexity: O()
+****************************/
+bool ChainPersistence()
+{
+	for(int id = 100; id < 103; id++)
+	{
+		
+	}
+	
+	return true;	
+}
+/*
+	1. Find all blocks that are depth n on honest chains
+	2. Check to see if block (and its position) are identical across all honest chains
+
+	Using an array based implementation, checking the position across other chains can be done in constant time
+*/
