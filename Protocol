@@ -1,17 +1,20 @@
 const int mineMax = 5;
 
 /*****************************
-UPPAAL supports bounded types
+
 *****************************/
 typedef struct
 {
-	int[1,4] id; // 4 nodes of the network
+	/***********************************************
+	Integer variables can be bounded to save memory. 
+	***********************************************/
+	int[1,3] id; // 3 nodes of the network
 	int[1,20] rd; // 20 rounds of mining?
 	
-	parent Block; // Not sure if this will work, may need to use int as a 'pointer' to array of parent block
-	int blocknum;
-	int length;
-	int sent_to[]; 
+	int parent;    // "Pointer" to index of previous block in the blockchain array
+	int blocknum;  // Current number of block
+	int length;    // I think this would be a useful field to add, easier for adversary to check if chain should be sent be sent 
+	int sent_to[]; // Used to stop adversary from sending blocks multiple times
 	
 } Block;
 
@@ -91,7 +94,7 @@ void sendBlock()
 		for(int i = 0; i < BlockChainSIZE; i++) // Cycle through all blocks in chain
 		{
 			if( (BlockChain[i].rd > round + max) && /*ID NOT IN SENT_TO[]*/)          
-				OverdueBlocks[] =                              // Array of blocks that must be sent this round
+				OverdueBlocks[] =                            
 			
 			if( (BlockChain[i].length > BestBlock[id].length) && /*ID NOT IN SENT_TO[]*/)
 				CandidateBlocks[] =  
