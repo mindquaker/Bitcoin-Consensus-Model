@@ -1,0 +1,106 @@
+const int mineMax = 5;
+
+/*****************************
+UPPAAL supports bounded types
+*****************************/
+typedef struct
+{
+	int[1,4] id; // 4 nodes of the network
+	int[1,20] rd; // 20 rounds of mining?
+	
+	parent Block; // Not sure if this will work, may need to use int as a 'pointer' to array of parent block
+	int blocknum;
+	int length;
+	int sent_to[]; 
+	
+} Block;
+
+/*****************************
+THESE DATA STRUCTURES SHOULD 
+BE BOUNDED
+*****************************/
+typedef struct 
+{
+	Block BlockChain[]; // Global structure of all blocks
+	Block BestBlock[]; // Head of each honest parties chain
+	int round; // The current round of the protocol
+} GlobalLedger
+
+/*****************************
+
+*****************************/
+bool doMining()
+{
+	double hash = random(100); //double random(double max) 
+	
+	if(hash <= 70)	
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+/*****************************
+
+*****************************/
+bool doMaliciousMining()
+{
+	bool miningSuccess;
+	
+	for(int i = 0; i < mineMax; i++)
+	{
+		if(hash >= 70)
+		{
+			miningSuccess = true;
+		}
+		else
+		{
+			miningSuccess = false;	
+		} 
+		
+		if(!miningSuccess)
+			break; // Documentation says "break" is reserved for future use, not sure if this was ever implemented
+				   // May have to find other way to break loop
+		
+		
+		/***********************
+		Update global block tree
+		***********************/
+	}
+	
+}
+
+/*****************************
+Function to find whether a 
+given id is in the sent_to 
+array of a given block
+*****************************/
+void findBlock()
+{
+	
+}
+
+/*****************************
+
+*****************************/
+void sendBlock()
+{
+	for(id = 100; id < 103; id++ ) // Probably have to change this
+	{
+		for(int i = 0; i < BlockChainSIZE; i++) // Cycle through all blocks in chain
+		{
+			if( (BlockChain[i].rd > round + max) && /*ID NOT IN SENT_TO[]*/)          
+				OverdueBlocks[] =                              // Array of blocks that must be sent this round
+			
+			if( (BlockChain[i].length > BestBlock[id].length) && /*ID NOT IN SENT_TO[]*/)
+				CandidateBlocks[] =  
+		
+		}
+			
+		
+		
+			
+	}
+		
+}
