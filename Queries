@@ -3,4 +3,12 @@ A : For all paths
 <> : Some state in a path
 [] :  All states in a path 
 
-A[] not deadlock    // In all reachable states, the system is not deadlocked (no outgoing transitions possible)
+Starting with simple model where N = 3. (Number of honest parties)
+Adversary is modeled as one system.
+
+A[] not deadlock                #In all reachable states, the system is not deadlocked (no outgoing transitions possible)
+E<> NODE1.protocolFailure
+E<> NODE2.protocolFailure
+E<> NODE3.protocolFailure
+
+E<> NODE1.protocolFailure && NODE2.protocolFailure && NODE3.protocolFailure #Other combinations of two nodes failing can be made as well
