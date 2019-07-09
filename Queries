@@ -3,12 +3,15 @@ A : For all paths
 <> : Some state in a path
 [] :  All states in a path 
 
+/*****************************************************************
 Starting with simple model where N = 3. (Number of honest parties)
-Adversary is modeled as one system.
+*****************************************************************/
 
-A[] not deadlock                #In all reachable states, the system is not deadlocked (no outgoing transitions possible)
-E<> NODE1.protocolFailure
+A[] not deadlock                // In all reachable states, the system is not deadlocked (no outgoing transitions possible)
+E<> NODE1.protocolFailure       // Can any of these nodes reach a state of failure?
 E<> NODE2.protocolFailure
 E<> NODE3.protocolFailure
 
-E<> NODE1.protocolFailure && NODE2.protocolFailure && NODE3.protocolFailure #Other combinations of two nodes failing can be made as well
+E<> NODE1.protocolFailure && NODE2.protocolFailure && NODE3.protocolFailure // Other combinations of two nodes failing can be made as well
+
+E<> NODE1.done && NODE2.done && NODE3.done  // Is there a state where all nodes finish 'x' rounds while satisfying all desired properties?
