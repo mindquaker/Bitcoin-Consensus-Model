@@ -1,6 +1,3 @@
-# Bitcoin-Consensus-Model
-
-
 # Best Intro to UPPAAL
 https://www.sws.cs.ru.nl/publications/papers/fvaan/handbookuppaal/paper.pdf
 
@@ -20,11 +17,11 @@ University of Warsaw
 https://arxiv.org/pdf/1405.1861.pdf
 https://github.com/lukmaz/uppaal-btc
 
-Kaylash Chaudhary*
-Ansgar Fehnker*
-Jaco van de Pol**
-Marielle Stoelinga**
+Kaylash Chaudhary 1
+Ansgar Fehnker 1
+Jaco van de Pol 2
+Marielle Stoelinga 2
 
-* University of the South Pacific, Fiji
-** University of Twente, The Netherlands
+1 = University of the South Pacific, Fiji
+2 = University of Twente, The Netherlands
 
