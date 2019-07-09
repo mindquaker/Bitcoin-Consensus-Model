@@ -6,7 +6,7 @@ https://www.sws.cs.ru.nl/publications/papers/fvaan/handbookuppaal/paper.pdf
 
 
 # Bitcoin Modeling with UPPAAL
-# Modeling and Verification of the Bitcoin Protocol
+### Modeling and Verification of the Bitcoin Protocol ###
 https://arxiv.org/pdf/1511.04173.pdf
 
 Marcin Andrychowicz 
@@ -16,7 +16,7 @@ Daniel Malinowski
 
 University of Warsaw
 
-# Modeling Bitcoin Contracts by Timed Automata
+### Modeling Bitcoin Contracts by Timed Automata ###
 https://arxiv.org/pdf/1405.1861.pdf
 https://github.com/lukmaz/uppaal-btc
 
