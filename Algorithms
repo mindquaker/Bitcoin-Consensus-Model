@@ -1,3 +1,8 @@
+/*****************************************
+Algorithms for desired properties of the
+Bitcoin consensus protocol
+*****************************************/
+
 /****************************
 Chain growth determines the 
 rate at which an honest 
