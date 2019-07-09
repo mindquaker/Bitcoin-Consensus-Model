@@ -1,6 +1,7 @@
 # Best Intro to UPPAAL
-https://www.sws.cs.ru.nl/publications/papers/fvaan/handbookuppaal/paper.pdf
-
+https://www.sws.cs.ru.nl/publications/papers/fvaan/handbookuppaal/paper.pdf  <br/> 
+Frits Vaandrager  <br/> 
+Radboud University  <br/> 
 
 # Bitcoin Modeling with UPPAAL
 ### Modeling and Verification of the Bitcoin Protocol ###
