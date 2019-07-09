@@ -1,0 +1,6 @@
+E : There exists a path
+A : For all paths
+<> : Some state in a path
+[] :  All states in a path 
+
+A[] not deadlock    // In all reachable states, the system is not deadlocked (no outgoing transitions possible)
