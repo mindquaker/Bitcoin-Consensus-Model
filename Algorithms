@@ -54,7 +54,10 @@ bool ChainQuality()
 */
 
 /****************************
-
+Similiar to finding the common
+prefix of two linked list, but
+here we can have many different
+list
 
 Time Complexity: O()
 Space Complexity: O()
@@ -100,5 +103,4 @@ bool ChainPersistence()
 	1. Find all blocks that are depth n on honest chains
 	2. Check to see if block (and its position) are identical across all honest chains
 
-	Using an array based implementation, checking the position across other chains can be done in constant time
 */
