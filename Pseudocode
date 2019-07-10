@@ -1,0 +1,115 @@
+==================================
+Definition of Block structure.
+==================================
+Def Block:
+    id: Creating Party  
+    rn: Round number at creation 
+    parent: Block
+    child: List<Block>
+    sentto: List<id>    # mainly for book-keeping by the adversary
+
+==================================
+Definition of a global blockchain.
+Individual chains will be modeled 
+with pointers to the head of chains
+==================================
+Global data structure:
+    BlockTree: Tree<Block>
+    BestBlock[id]: Block
+    round: int
+
+
+==================================
+Setting initial conditions for 
+system. A work-around for initial
+satisfiability is needed.
+==================================
+Init:
+    round = 0
+    Block genesis(id = 0, rn = 0, parent = null, child = null)
+    BlockTree.initialize(genesis)
+
+
+==================================
+Setting behavior of honest parties
+==================================
+Honest Party i:
+    if receive block from Adversary	# this is guaranteed to be longer than BestBlock[id]
+    	BestBlock[id] = block           # honest party now had new chain to build on
+
+    Bool MiningSuccess = doMining()     # returns true with defined probability
+    
+    if !MiningSuccess:			# if a block is not found, the honest party breaks
+        then return
+    
+
+    Block NewBlock(id = i, rn = round, parent = BestBlock[id], child = null) # honest party builds on their best chain
+    BlockTree.addBlock(NewBlock)       					     # update global BlockTree
+    BestBlock[id] = NewBlock						     # best block is now the most recent mined
+
+
+==================================
+Nested Loops are O(n^2) but honest 
+parties and the amount of overdue
+blocks should be manageable 
+==================================
+Adversary:
+    round = round+1
+
+    # Send or withhold blocks to parties
+
+    forall id: Honest parties
+	Overdue_Blocks[] = Blocks in BlockTree w/ round >= block.rn + max and id not in block.sentto        #These blocks are 'overdue', must be sent
+
+	Candidate_Blocks[] = Blocks in BlockTree w/ block.length > BestBlock[id].length and 
+			     id not in block.sentto                                                         #These blocks are longer than honest parties chain
+	
+	# Send all overdue blocks to honest party
+	for all blocks in Overdue_Blocks[]: 
+		block.sentto.add(id)
+
+	# Check if any overdue blocks are longer than the honest parties best chain
+	if ( (Overdue_Blocks[] and Candidate_Blocks[]) != 0) 
+		OutgoingBlock = ND-choice(blocks in (Overdue_Blocks[] and Candidate_Blocks[]) with maximal length)
+		send OutgoingBlock to id
+	
+	else
+		OutgoingBlock = ND-choice(Candidate_Blocks[], null)                                  #Either a longer chain or no chain is sent
+		send OutgoingBlock to id
+
+    
+    # mine adversarial blocks (may mine several blocks per round)
+    
+    for i = 1 to minemax:
+        ND-choose block from BlockTree     # does this imply the adversary is mining on top of random blocks?
+
+        Bool MiningSuccess = doAdvMining() # returns true with defined probability
+        
+        if !MiningSuccess                  # do nothing if block is not mined
+            then break
+        
+        
+        Block NewBlock(id = Adv, rn = round, parent = block, child = null)
+        BlockTree.addBlock(NewBlock)       # update global BlockTree 
+
+
+
+
+==================================
+Properties (to be formally stated)
+==================================
+WHP, the following hold:
+1. Honest chains grow, in terms of BestBlock[id]             # Honest nodes are able to share new blocks effectively
+	BestBlock[id].length grows at least every x rounds
+
+2. Honest chains contain lambda-fraction honest blocks       # To limit monetary rewards (and therefore power in PoW) to those attacking maliciously
+	Number of honest blocks is proportional to honest
+	"hashing" power
+
+3. Common prefix of all honest chains not too far back       # Honest nodes need to agree on some ordering of valid transactions
+	Work backwards from BestBlock[id] concurrently 
+        until BestBlock[id].parent.blocknum are all equal
+	
+4. Blocks at depth n on honest chain stay on honest chains   # Accepted transactions should be included in all honest chains
+	If a block is at depth n from head, then all honest
+	parties agree on its existence and position
