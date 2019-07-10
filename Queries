@@ -14,4 +14,4 @@ E<> NODE3.protocolFailure
 
 E<> NODE1.protocolFailure && NODE2.protocolFailure && NODE3.protocolFailure // Other combinations of two nodes failing can be made as well
 
-E<> NODE1.done && NODE2.done && NODE3.done  // Is there a state where all nodes finish 'x' rounds while satisfying all desired properties?
+E<> NODE1.done && NODE2.done && NODE3.done && ADVERSARY.done // Is there a state where all nodes finish 'x' rounds while satisfying all desired properties?
