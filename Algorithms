@@ -38,13 +38,12 @@ Space Complexity: O()
 ****************************/
 bool ChainQuality()
 {
-	for(int id = 100; id < 103; id++)
-	{
-		// Go from head of chain back to genesis block
-		while(BestBlock[id].parent != 0)
-		{
-			if(Block)
-		}
+	for(int i = 1; i < 4; i++)
+	{	
+		for(int j = 1; j < 
+		GlobalLedger.bestBlock[i]
+		if(GlobalLedger.BlockChain[parent].id == 0) // If the block was created by a malicious party
+		
 	}
 }
 /*
