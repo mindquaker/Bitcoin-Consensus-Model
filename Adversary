@@ -1,0 +1,71 @@
+
+
+/**************************************
+This function creates an adverserial 
+block.
+**************************************/
+void initAdvBlock(Block & b)
+{
+    b.id = 0;
+    b.rd = current_round;
+    
+ 
+    
+    b.parent = fint( random(current_block)) ; // Adversary will non-deterministically pick any current blocks to mine on 
+       
+
+    b.blocknum = current_block;
+    b.length = (GlobalLedger.BlockChain[b.parent].length) + 1; // Length should be one longer than the parent
+
+    b.sent[0] = false;
+    b.sent[1] = false;
+    b.sent[2] = false;
+    
+    for(i : int[0,nodeMax-1]) // All miners should start to mine on this block
+        GlobalLedger.bestBlock[i] = b.blocknum;
+
+}
+
+/**************************************
+This function checks whether an id is the
+'sent' field of a given block in the chain.
+This prevents the model from sending the 
+same block to a node multiple times.
+**************************************/
+bool sentTo(int blockIndex, int id)
+{
+ 
+    
+    for(i : int[0, nodeMax-1] )  // For all indices in the 'sent' field, check for the id of a given party 
+            if(GlobalLedger.BlockChain[blockIndex].sent[i] == id)
+                return true;
+        
+    return false;
+}
+
+/**************************************
+This function handles the communication
+aspect of the network. It makes the
+adversary send overdue and candidate
+blocks to the honest parties
+**************************************/
+void sendBlock()
+{
+
+    for(i : int[0, nodeMax-1] ) // For all honest parties
+    {
+            for(j : int[0, blockMax-1] ) // Can probably change this to "current_block-1"
+            {
+                if( (GlobalLedger.BlockChain[j].rd + maxLatency < current_round  ) && !sentTo(j, i)) // If the block is overdue and it hasnt been seen by the honest party
+                    {
+                        GlobalLedger.BlockChain[j].sent[i] = true; // Honest chain has 'seen' this block now
+ 
+                    }
+                if( (GlobalLedger.BlockChain[j].length >  GlobalLedger.BlockChain[GlobalLedger.bestBlock[i]].length) ) // If the block is longer than the best the honest party  has
+                    {
+                        GlobalLedger.bestBlock[i] = j; // Update honest chain to be the longest
+                    }        
+            }
+            
+    }
+}
