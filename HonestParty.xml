@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>/**************************************
+Constants
+**************************************/
+const int node_max = 3;
+const int round_max = 1440;
+const int block_max = 600;
+
+const int max_behind = 6;
+const int max_fork_length = 6;
+const int min_chain_growth = 30;
+const int k = 8;
+
+/**************************************
+Channels
+**************************************/
+
+
+/**************************************
+User Defined Objects
+**************************************/
+typedef struct
+{
+    int[0,node_max] id; 
+	int rd; 
+	
+	int parent;    // "Pointer" to index of previous block in the blockchain array
+	int block_num;  
+	int length;    
+	
+    bool sent[node_max]; // Used to stop adversary from sending blocks multiple times
+
+} Block;
+
+typedef struct 
+{
+	Block blockchain[block_max]; // Global structure of all blocks
+	int best_block[node_max+1];     // Head of each honest parties chain 
+    
+} Global_Ledger;
+
+
+/**************************************
+Global Variables
+**************************************/
+Block b1;
+Block b2;
+Global_Ledger ledger;
+
+int k_depth[node_max+1];
+int current_block = 0;
+int current_round = 1;
+
+
+
+/**************************************
+This function adds new blocks to the 
+global blockchain
+**************************************/
+void addBlock(Block &amp;b)
+{
+    ledger.blockchain[current_block] = b;
+    current_block++;
+}
+
+
+
+
+</declaration>
+	<template>
+		<name>Honest</name>
+		<declaration>/**************************************
+This function creates an honest block.
+**************************************/
+void HonestBlock(int miner, Block &amp; b)
+{
+    b.id = miner;
+    b.rd = current_round;
+
+    b.parent = ledger.best_block[miner]; // Mine on top of the honest parties best chain
+    b.block_num = current_block;
+    b.length = (ledger.blockchain[b.parent].length) + 1; // Length should be one longer than the parent
+
+    b.sent[0] = false;
+    b.sent[1] = false;
+    b.sent[2] = false;
+}
+
+/****************************
+Chain quality determines
+the amount of malicious blocks
+in the chain of an hoenst
+party
+****************************/
+bool ChainQuality(int miner)
+{
+
+    int head = ledger.best_block[miner];      // Temp variable to store each block of local chain
+    int quality = 0;                            // Count to store the quality of chain
+    int len = ledger.blockchain[head].length;
+    int count = 72;
+    
+    if(len &lt; 72) 
+        return false;                         // Dont consider chains over small period of time, too much variability here
+
+	while(count != 0)
+    {
+        if(ledger.blockchain[head].id == 0) // If the block was created by a malicious party
+	        quality--;
+        else
+            quality++;
+        
+        head = ledger.blockchain[head].parent; // The head is now the parent block
+        count--;
+    }
+	    	
+	if(quality &lt; 0)                              // Assuming quality chains have a simple majority of honest blocks
+        return true;
+
+    else
+        return false;
+}
+
+
+/****************************
+Chain growth determines the 
+rate at which an honest 
+party adds blocks to their
+chain
+
+This is in terms of blocks,
+so an honest node that is more
+than some 'max_behind' the 
+global chain is considered to 
+have failed
+****************************
+bool ChainGrowth(int miner)
+{
+	int head = ledger.best_block[miner];
+
+	if( (current_block - ledger.blockchain[head].block_num) &gt;= max_behind &amp;&amp; current_round &gt; 10) 
+	    return true;
+	else
+	    return false;
+}
+*/
+
+bool ChainGrowth(int miner)
+{
+    int head = ledger.best_block[miner];
+
+    if( (current_round - ledger.blockchain[head].rd) &gt; min_chain_growth &amp;&amp; current_round &gt; min_chain_growth)
+        return true;
+    else
+        return false;
+}
+
+/****************************
+This function is used from 
+within the Chain persistence
+function. It will return true
+or false depending whether
+a block is found in a local 
+chain of an honest party.
+
+****************************/
+bool findBlock(int blockIndex, int miner)
+{
+    int head = ledger.best_block[miner];
+    
+    
+    while(head &gt;= blockIndex) // You can prune this search by stopping when you pass the blockIndex. Will be useful for larger chains
+        {
+            if(ledger.blockchain[head].block_num == blockIndex)
+                return true;
+            head = ledger.blockchain[head].parent;
+        }
+    return false;
+}
+
+/****************************
+Not sure if this handles the 
+case where blocks are in the 
+same chain, but in different
+order. Could try adding a counter
+than makes sure the depth of 
+the given block is also
+the same.
+
+This tells us the common prefix
+property is satisfied, but not 
+by how many blocks
+****************************/
+bool CommonPrefix()
+{
+    for( honest_id : int[1, node_max] ) // This should be changed if more nodes are added
+    {
+        int head = ledger.best_block[honest_id];             // Index that points to the head of an honest local chain
+        int longest = ledger.blockchain[head].length;   // Length of the head of the chain
+        
+        if(longest &gt; 6)
+        {
+            while(longest - ledger.blockchain[head].length != max_fork_length)    // Go backwards until a block that is 10 'deep' is found
+            {
+                head = ledger.blockchain[head].parent;               // The previous block is now checked against the expression
+            }
+        // Check if it is found
+        
+            for( other_honest : int[1, 2] ) // This should be changed if more nodes are added
+            {
+                if(other_honest != honest_id)
+                    if(!findBlock(head, other_honest))
+                        return true;                           // Head of block we are looking for, and id of local chain we are looking in
+            }
+        }
+    }
+    return false;
+}
+/***************************
+Blocks that are of depth k
+in an honest chain should 
+never be abandoned. When the
+best_block[] of a chain is
+updated (ie a new chain is 
+being mined on) we must check
+if the block at depth k, and 
+therefore the blocks at k+1, k+2
+, etc are still on the chain.
+
+
+***************************/
+bool ChainPersistence()
+{
+    
+    for( honest_id : int[1, node_max-1] )
+    {   
+        int head = ledger.best_block[honest_id];
+        if(ledger.blockchain[head].length &gt; 10) 
+        {
+            int k_block = k_depth[honest_id]; // Block of interest is that at depth k
+            if(!findBlock(k_block, honest_id))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+/**************************
+This function determines
+the block that is at depth 
+k on each honest chain
+
+This function says forks of
+depth k are not allowed in 
+the protocol.
+**************************/
+void find_k_depth()
+{
+
+   
+    for( honest_id : int[1, node_max-1] )
+    {
+        
+        int longest = ledger.best_block[honest_id];
+        int cnt = 0;
+        if(ledger.blockchain[longest].length &gt; k) //Only check chains that have depths of k or more
+        {    
+            while(cnt != k)
+            {
+                longest = ledger.blockchain[longest].parent;
+                cnt++;
+            }
+            k_depth[honest_id] =  longest;
+        }
+    }    
+}</declaration>
+		<location id="id0" x="306" y="85">
+			<name x="323" y="77">begin</name>
+			<label kind="exponentialrate" x="323" y="102">1:1</label>
+		</location>
+		<location id="id1" x="663" y="-169">
+			<name x="671" y="-203">one_winner</name>
+			<label kind="exponentialrate" x="689" y="-178">1:1</label>
+		</location>
+		<location id="id2" x="94" y="-195">
+			<name x="60" y="-229">no_winner</name>
+			<label kind="exponentialrate" x="86" y="-178">1:1</label>
+		</location>
+		<location id="id3" x="306" y="272">
+			<name x="255" y="289">protocol_failure</name>
+		</location>
+		<location id="id4" x="306" y="-195">
+			<name x="204" y="-212">two_winner</name>
+			<label kind="exponentialrate" x="264" y="-186">1:1</label>
+		</location>
+		<branchpoint id="id5" x="306" y="-8">
+		</branchpoint>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="guard" x="672" y="136">ChainPersistence()</label>
+			<nail x="663" y="272"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<nail x="663" y="-254"/>
+			<nail x="34" y="-254"/>
+			<nail x="34" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id0"/>
+			<nail x="306" y="-254"/>
+			<nail x="34" y="-254"/>
+			<nail x="34" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<nail x="34" y="-195"/>
+			<nail x="34" y="69"/>
+			<nail x="34" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="323" y="-246">HonestBlock(0, b1),
+addBlock(b1), 
+HonestBlock(2, b2),
+addBlock(b2),
+ledger.best_block[0] = b1.block_num,
+ledger.best_block[1] = b1.block_num,
+ledger.best_block[2] = b2.block_num</label>
+			<label kind="probability" x="315" y="-110">45</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id5"/>
+			<label kind="guard" x="315" y="9">current_round &lt; round_max</label>
+			<label kind="assignment" x="314" y="26">current_round++,
+find_k_depth()</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="guard" x="128" y="111">ChainQuality(1) ||
+ChainGrowth(1)  ||
+ChainQuality(2) ||
+ChainGrowth(2)  ||
+CommonPrefix()</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id2"/>
+			<label kind="probability" x="230" y="-93">8955</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id1"/>
+			<label kind="select" x="756" y="-238">id : int[0,2]</label>
+			<label kind="assignment" x="756" y="-221">HonestBlock(id, b1),
+addBlock(b1),
+ledger.best_block[0] = b1.block_num,
+ledger.best_block[1] = b1.block_num,
+ledger.best_block[2] = b1.block_num</label>
+			<label kind="probability" x="357" y="-25">1000</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+network = Honest();
+
+
+
+
+// List one or more processes to be composed into a system.
+
+system  network;
+    </system>
+	<queries>
+		<query>
+			<formula>Pr[#&lt;=100] (&lt;&gt; MaliciousAttacker.noAdvBlock)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[#&lt;=100](&lt;&gt; MaliciousAttacker.foundAdvBlock)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[#&lt;=100](&lt;&gt; Node1.no_block)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[#&lt;= 100](&lt;&gt; Node1.found_block)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate[#&lt;=100]{Node1.found_block}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; network.protocol_failure
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; MaliciousAttacker.foundAdvBlock
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[#&lt;=500000] (&lt;&gt; network.protocol_failure)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[#&lt;=50] (&lt;&gt; Node1.protocol_failure &amp;&amp; Node2.protocol_failure)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>
